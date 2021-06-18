@@ -82,7 +82,7 @@ export function getViewState(map, coordinateTransformer) {
   const {
     lat: latitude,
     lng: longitude,
-    heading,
+    heading: bearing,
     tilt: pitch,
     zoom
   } = coordinateTransformer.getCameraParams();
@@ -93,7 +93,7 @@ export function getViewState(map, coordinateTransformer) {
     // Hardcode for now
     left: 0,
     top: 0,
-    heading,
+    bearing,
     zoom: zoom - 1,
     pitch,
     latitude,
