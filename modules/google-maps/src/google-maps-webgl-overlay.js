@@ -82,25 +82,11 @@ export default class GoogleMapsOverlay {
 
   _draw(gl, matrix, coordinateTransformer, layerState) {
     const deck = this._deck;
-    const {
-      lat: latitude,
-      lng: longitude,
-      heading,
-      tilt: pitch,
-      zoom
-    } = coordinateTransformer.getCameraParams();
 
-    const container = this._map.getDiv().firstChild;
-    const width = container.offsetWidth;
-    const height = container.offsetHeight;
-
-    // Hardcode for now
-    const left = 0;
-    const top = 0;
-    // const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewState(
-    //   this._map,
-    //   this._overlay
-    // );
+    const {width, height, left, top, zoom, pitch, latitude, longitude} = getViewState(
+      this._map,
+      coordinateTransformer
+    );
 
     const canSyncWithGoogleMaps = pitch === 0;
 
