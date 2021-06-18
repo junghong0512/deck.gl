@@ -90,9 +90,6 @@ export function getViewState(map, coordinateTransformer) {
   return {
     width,
     height,
-    // Hardcode for now
-    left: 0,
-    top: 0,
     bearing,
     zoom: zoom - 1,
     pitch,

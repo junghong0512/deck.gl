@@ -83,16 +83,12 @@ export default class GoogleMapsOverlay {
   _draw(gl, matrix, coordinateTransformer, layerState) {
     const deck = this._deck;
 
-    const {width, height, left, top, zoom, bearing, pitch, latitude, longitude} = getViewState(
+    const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
       this._map,
       coordinateTransformer
     );
 
     const canSyncWithGoogleMaps = true;
-
-    const parentStyle = deck.canvas.parentElement.style;
-    parentStyle.left = `${left}px`;
-    parentStyle.top = `${top}px`;
 
     deck.setProps({
       width,
