@@ -94,7 +94,7 @@ export function getViewState(map, coordinateTransformer) {
     left: 0,
     top: 0,
     heading,
-    zoom,
+    zoom: zoom - 1,
     pitch,
     latitude,
     longitude
