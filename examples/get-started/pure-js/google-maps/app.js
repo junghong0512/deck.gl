@@ -1,5 +1,6 @@
 /* global document, google */
-import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
+// import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
+import {GoogleMapsWebglOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
