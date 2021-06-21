@@ -4,10 +4,9 @@ import {Deck} from '@deck.gl/core';
 /**
  * Get a new deck instance
  * @param map (google.maps.Map) - The parent Map instance
- * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  * @param [deck] (Deck) - a previously created instances
  */
-export function createDeckInstance(map, overlay, deck, props) {
+export function createDeckInstance(map, gl, deck, props) {
   if (deck) {
     if (deck.props.userData._googleMap === map) {
       return deck;

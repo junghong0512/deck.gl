@@ -67,12 +67,10 @@ export default class GoogleMapsOverlay {
   }
 
   /* Private API */
-  _onAdd() {
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
-  }
+  _onAdd() {}
 
   _onContextRestored(gl) {
-    console.log('_onContextRestored');
+    this._deck = createDeckInstance(this._map, gl, this._deck, this.props);
   }
 
   _onRemove() {
