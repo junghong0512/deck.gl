@@ -98,7 +98,7 @@ export default class GoogleMapsOverlay {
       layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
     // Deck is initialized
-    deck.redraw(true);
+    deck.redraw('google-vector');
 
     // Reset GL params (unclear if necessary)
     setParameters(gl, oldParams);
