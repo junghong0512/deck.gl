@@ -24,23 +24,14 @@ export function createDeckInstance(map, gl, deck, props) {
 
   const deckProps = {
     ...props,
-    // Copied from Mapbox implementation
-    // useDevicePixels: true,
-    // _customRender: () => {
-    //   map.triggerRepaint();
-    //   if (customRender) {
-    //     // customRender may be subscribed by DeckGL React component to update child props
-    //     // make sure it is still called
-    //     customRender();
-    //   }
-    // },
-    // // TODO: import these defaults from a single source of truth
-    // parameters: {
-    //   depthMask: true,
-    //   depthTest: true,
-    //   blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-    //   blendEquation: gl.FUNC_ADD
-    // },
+    useDevicePixels: true,
+    // TODO: import these defaults from a single source of truth
+    parameters: {
+      depthMask: true,
+      depthTest: true,
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      blendEquation: gl.FUNC_ADD
+    },
     // userData: {
     //   isExternal: false,
     //   mapboxLayers: new Set()

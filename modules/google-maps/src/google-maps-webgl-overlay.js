@@ -1,4 +1,5 @@
 /* global google */
+import {getParameters, setParameters} from '@luma.gl/core';
 import {createDeckInstance, destroyDeckInstance, getViewState} from './webgl-utils';
 
 const HIDE_ALL_LAYERS = () => false;
@@ -80,6 +81,7 @@ export default class GoogleMapsOverlay {
 
   _draw(gl, matrix, coordinateTransformer, layerState) {
     const deck = this._deck;
+    const oldParams = getParameters(gl);
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
       this._map,
@@ -96,6 +98,9 @@ export default class GoogleMapsOverlay {
       layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
     // Deck is initialized
-    deck.redraw();
+    deck.redraw(true);
+
+    // Reset GL params (unclear if necessary)
+    setParameters(gl, oldParams);
   }
 }
