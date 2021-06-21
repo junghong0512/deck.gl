@@ -22,8 +22,31 @@ export function createDeckInstance(map, gl, deck, props) {
     mouseout: null
   };
 
-  deck = new Deck({
+  const deckProps = {
     ...props,
+    // Copied from Mapbox implementation
+    // useDevicePixels: true,
+    // _customRender: () => {
+    //   map.triggerRepaint();
+    //   if (customRender) {
+    //     // customRender may be subscribed by DeckGL React component to update child props
+    //     // make sure it is still called
+    //     customRender();
+    //   }
+    // },
+    // // TODO: import these defaults from a single source of truth
+    // parameters: {
+    //   depthMask: true,
+    //   depthTest: true,
+    //   blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+    //   blendEquation: gl.FUNC_ADD
+    // },
+    // userData: {
+    //   isExternal: false,
+    //   mapboxLayers: new Set()
+    // }
+
+    // -----
     style: {pointerEvents: 'none'},
     parent: getContainer(map, props.style),
     initialViewState: {
@@ -36,7 +59,21 @@ export function createDeckInstance(map, gl, deck, props) {
       _googleMap: map,
       _eventListeners: eventListeners
     }
-  });
+  };
+
+  if (deck) {
+    deck.setProps(deckProps);
+    deck.props.userData.isExternal = true;
+  } else {
+    // Using external gl context - do not set css size
+    Object.assign(deckProps, {
+      gl,
+      width: false,
+      height: false,
+      touchAction: 'unset'
+    });
+    deck = new Deck(deckProps);
+  }
 
   return deck;
 }
