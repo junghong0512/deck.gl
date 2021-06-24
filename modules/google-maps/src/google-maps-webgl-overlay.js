@@ -91,16 +91,16 @@ export default class GoogleMapsOverlay {
     this._deck.setProps({layerFilter: HIDE_ALL_LAYERS});
   }
 
+  // Suppling this leads to the code load some other file
+  // and _onDraw not being called
+  // _draw(gl, matrix, coordinateTransformer, layerState) {
+
   _onDraw(gl, coordinateTransformer) {
     // Extract projection matrix
-    //const viewMatrix = coordinateTransformer.fromLatLngAltitude(this._map.center, 200);
-    const viewMatrix = coordinateTransformer.fromLatLngAltitude(
-      {lat: -90, lng: -180},
-      0,
-      [0, 0, 0],
-      [1, 1, 1]
-    );
-    const projectionMatrix = matrix;
+    const projectionMatrix = [...coordinateTransformer.fromLatLngAltitude(this._map.center, 0)];
+    const viewMatrix = [
+      ...coordinateTransformer.fromLatLngAltitude({lat: -90, lng: -180}, 0, [0, 0, 0], [1, 1, 1])
+    ];
 
     if (!matEqual(projectionMatrix, window._projectionMatrix)) {
       window._projectionMatrix = [...projectionMatrix];
@@ -120,14 +120,27 @@ export default class GoogleMapsOverlay {
       coordinateTransformer
     );
 
-    const canSyncWithGoogleMaps = true;
+    // Google appears to use 1m as their altitude when constructing
+    // the Mercator projection matrix (deck.gl default is 1.5m)
+    const altitude = 1;
+    const nearZMultiplier = 0.3333333432674408;
+    const farZMultiplier = 10000;
 
     deck.setProps({
       width,
       height,
-      viewState: {bearing, latitude, longitude, pitch, zoom, repeat: true},
+      viewState: {
+        altitude,
+        bearing,
+        farZMultiplier,
+        latitude,
+        longitude,
+        nearZMultiplier,
+        pitch,
+        zoom,
+        repeat: true
+      }
       // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
-      layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
     // Deck is initialized
     deck.redraw('google-vector');
