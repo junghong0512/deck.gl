@@ -429,19 +429,41 @@ export default class Viewport {
     this.cameraPosition = getCameraPosition(this.viewMatrixInverse);
 
     if (window._projectionMatrix) {
-      // Debug (get Google camera position)
-      const gViewMatrixInverse = mat4.invert([], window._viewMatrix);
-      const gCamera = getCameraPosition(gViewMatrixInverse);
-      // console.log('google camera', gCamera, 'deck', this.cameraPosition);
+      // Split out view matrix from projection
+      const viewMatrix = createMat4();
+      const mvpMatrix = window._viewMatrix;
+      const projectionMatrixInverse = mat4.invert([], window._projectionMatrix);
+      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
+      mat4.multiply(viewMatrix, viewMatrix, mvpMatrix);
+      const gViewMatrixInverse2 = mat4.invert([], viewMatrix);
 
-      // Extract near/far
-      let m = this.projectionMatrix;
-      const near = m[14] / (m[10] - 1);
-      const far = m[14] / (m[10] + 1);
-      m = window._projectionMatrix;
-      const gNear = m[14] / (m[10] - 1);
-      const gFar = m[14] / (m[10] + 1);
-      console.log('google near', gNear, 'far', gFar, 'deck near', near, 'far', far);
+      // Debug (get Google camera position)
+      const gViewMatrixInverse = mat4.invert([], viewMatrix);
+      const gCamera = getCameraPosition(gViewMatrixInverse);
+      const c = this.cameraPosition;
+      console.log('google camera', gCamera, 'deck', this.cameraPosition);
+      console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
+
+      const vpmInfo = function(m) {
+        const info = {
+          scaleZ: -m[11],
+          translateZ: -m[15]
+        };
+        if (m[10] === m[11]) {
+          // Far plane is at infinity
+          info.near = (1 - m[14]) / 2;
+          info.far = Infinity;
+        } else {
+          info.near = m[14] / (m[10] - 1);
+          info.far = m[14] / (m[10] + 1);
+        }
+
+        return info;
+      };
+
+      // Display information about VP matrices
+      console.table(vpmInfo(window._projectionMatrix));
+      console.table(vpmInfo(this.viewProjectionMatrix));
     }
 
     /*
