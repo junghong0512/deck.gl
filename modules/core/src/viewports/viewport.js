@@ -446,6 +446,7 @@ export default class Viewport {
 
       const vpmInfo = function(m) {
         const info = {
+          altitude: m[5] / 2,
           scaleZ: -m[11],
           translateZ: -m[15]
         };
@@ -454,16 +455,20 @@ export default class Viewport {
           info.near = (1 - m[14]) / 2;
           info.far = Infinity;
         } else {
-          info.near = m[14] / (m[10] - 1);
-          info.far = m[14] / (m[10] + 1);
+          const a = -m[10] / m[11];
+          const b = m[14] - m[10] / m[11];
+          info.far = b / (1 + a);
+          info.near = (info.far * (1 + a)) / (a - 1);
         }
 
         return info;
       };
 
       // Display information about VP matrices
-      console.table(vpmInfo(window._projectionMatrix));
-      console.table(vpmInfo(this.viewProjectionMatrix));
+      console.table({
+        Google: vpmInfo(window._projectionMatrix),
+        Deck: vpmInfo(this.viewProjectionMatrix)
+      });
     }
 
     /*
