@@ -444,11 +444,17 @@ export default class Viewport {
       //console.log('google camera', gCamera, 'deck', this.cameraPosition);
       //console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
 
-      const vpmInfo = function(m) {
+      const vpmInfo = function(m, goo) {
         const scaleZ = -m[11];
+        const scaleY = goo ? 2.255354166030884 * scaleZ : scaleZ; // assume scaleZ = scaleY??
+        const aspect = m[5] / m[0];
+        const f = m[5] / scaleY;
         const info = {
-          altitude: m[5] / (2 * scaleZ),
-          scaleZ,
+          altitude: f / 2,
+          aspect,
+          scaleZ, // assume equal to scaleX and scaleY
+          translateX: (aspect * m[12]) / f,
+          translateY: m[13] / f,
           translateZ: -m[15]
         };
         if (m[10] === m[11]) {
@@ -467,10 +473,13 @@ export default class Viewport {
 
       // Display information about VP matrices
       if (Math.random() < 0.1) {
+        const gInfo = vpmInfo(window._viewMatrix, true);
+        const dInfo = vpmInfo(this.viewProjectionMatrix);
         console.table({
-          Google: vpmInfo(window._projectionMatrix),
-          Deck: vpmInfo(this.viewProjectionMatrix)
+          Google: gInfo,
+          Deck: dInfo
         });
+        console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
       }
     }
 
