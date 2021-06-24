@@ -441,13 +441,14 @@ export default class Viewport {
       const gViewMatrixInverse = mat4.invert([], viewMatrix);
       const gCamera = getCameraPosition(gViewMatrixInverse);
       const c = this.cameraPosition;
-      console.log('google camera', gCamera, 'deck', this.cameraPosition);
-      console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
+      //console.log('google camera', gCamera, 'deck', this.cameraPosition);
+      //console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
 
       const vpmInfo = function(m) {
+        const scaleZ = -m[11];
         const info = {
-          altitude: m[5] / 2,
-          scaleZ: -m[11],
+          altitude: m[5] / (2 * scaleZ),
+          scaleZ,
           translateZ: -m[15]
         };
         if (m[10] === m[11]) {
@@ -465,10 +466,12 @@ export default class Viewport {
       };
 
       // Display information about VP matrices
-      console.table({
-        Google: vpmInfo(window._projectionMatrix),
-        Deck: vpmInfo(this.viewProjectionMatrix)
-      });
+      if (Math.random() < 0.1) {
+        console.table({
+          Google: vpmInfo(window._projectionMatrix),
+          Deck: vpmInfo(this.viewProjectionMatrix)
+        });
+      }
     }
 
     /*
