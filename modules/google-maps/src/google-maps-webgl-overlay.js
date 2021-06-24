@@ -124,7 +124,7 @@ export default class GoogleMapsOverlay {
     // the Mercator projection matrix (deck.gl default is 1.5m)
     const altitude = 1;
     const nearZMultiplier = 0.3333333432674408;
-    const farZMultiplier = 10000;
+    const farZMultiplier = 10000000;
 
     deck.setProps({
       width,
