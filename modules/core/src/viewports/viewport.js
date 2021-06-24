@@ -403,6 +403,18 @@ export default class Viewport {
   }
 
   _initPixelMatrices() {
+    if (false && window._projectionMatrix) {
+      this.projectionMatrix.copy(window._projectionMatrix);
+
+      // decompose (experiment)
+      const viewMatrix = createMat4();
+      const mvpMatrix = window._viewMatrix;
+      const projectionMatrixInverse = mat4.invert([], this.projectionMatrix);
+      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
+      mat4.multiply(viewMatrix, viewMatrix, mvpMatrix);
+
+      this.viewMatrix.copy(viewMatrix);
+    }
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
     const vpm = createMat4();
@@ -410,13 +422,27 @@ export default class Viewport {
     mat4.multiply(vpm, vpm, this.viewMatrix);
     this.viewProjectionMatrix = vpm;
 
-    // console.log('VPM', this.viewMatrix, this.projectionMatrix, this.viewProjectionMatrix);
-
     // Calculate inverse view matrix
     this.viewMatrixInverse = mat4.invert([], this.viewMatrix) || this.viewMatrix;
 
     // Decompose camera parameters
     this.cameraPosition = getCameraPosition(this.viewMatrixInverse);
+
+    if (window._projectionMatrix) {
+      // Debug (get Google camera position)
+      const gViewMatrixInverse = mat4.invert([], window._viewMatrix);
+      const gCamera = getCameraPosition(gViewMatrixInverse);
+      // console.log('google camera', gCamera, 'deck', this.cameraPosition);
+
+      // Extract near/far
+      let m = this.projectionMatrix;
+      const near = m[14] / (m[10] - 1);
+      const far = m[14] / (m[10] + 1);
+      m = window._projectionMatrix;
+      const gNear = m[14] / (m[10] - 1);
+      const gFar = m[14] / (m[10] + 1);
+      console.log('google near', gNear, 'far', gFar, 'deck near', near, 'far', far);
+    }
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels

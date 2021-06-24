@@ -1,8 +1,20 @@
 /* global google */
-import {getParameters, setParameters} from '@luma.gl/core';
+import {getParameters, setParameters, resetParameters} from '@luma.gl/core';
 import {createDeckInstance, destroyDeckInstance, getViewState} from './webgl-utils';
 
 const HIDE_ALL_LAYERS = () => false;
+
+function matEqual(a, b) {
+  if (a === undefined || b === undefined) {
+    return false;
+  }
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export default class GoogleMapsOverlay {
   constructor(props) {
@@ -14,7 +26,7 @@ export default class GoogleMapsOverlay {
     overlay.onAdd = this._onAdd.bind(this);
     overlay.onContextRestored = this._onContextRestored.bind(this);
     overlay.onRemove = this._onRemove.bind(this);
-    overlay.draw = this._draw.bind(this);
+    overlay.onDraw = this._onDraw.bind(this);
     this._overlay = overlay;
 
     this.setProps(props);
@@ -79,9 +91,29 @@ export default class GoogleMapsOverlay {
     this._deck.setProps({layerFilter: HIDE_ALL_LAYERS});
   }
 
-  _draw(gl, matrix, coordinateTransformer, layerState) {
+  _onDraw(gl, coordinateTransformer) {
+    // Extract projection matrix
+    //const viewMatrix = coordinateTransformer.fromLatLngAltitude(this._map.center, 200);
+    const viewMatrix = coordinateTransformer.fromLatLngAltitude(
+      {lat: -90, lng: -180},
+      0,
+      [0, 0, 0],
+      [1, 1, 1]
+    );
+    const projectionMatrix = matrix;
+
+    if (!matEqual(projectionMatrix, window._projectionMatrix)) {
+      window._projectionMatrix = [...projectionMatrix];
+      //console.log('projectionMatrix changed', window._projectionMatrix);
+    }
+    if (!matEqual(viewMatrix, window._viewMatrix)) {
+      window._viewMatrix = [...viewMatrix];
+      //console.log('viewMatrix changed', window._viewMatrix);
+    }
+
+    //this._overlay.requestRedraw(); // not a good idea, hangs
     const deck = this._deck;
-    const oldParams = getParameters(gl);
+    //const oldParams = getParameters(gl);
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
       this._map,
@@ -101,6 +133,7 @@ export default class GoogleMapsOverlay {
     deck.redraw('google-vector');
 
     // Reset GL params (unclear if necessary)
-    setParameters(gl, oldParams);
+    //setParameters(gl, oldParams);
+    //resetParameters(gl);
   }
 }
