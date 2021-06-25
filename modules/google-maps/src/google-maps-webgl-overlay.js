@@ -117,7 +117,6 @@ export default class GoogleMapsOverlay {
       //console.log('viewMatrix changed', window._viewMatrix);
     }
 
-    //this._overlay.requestRedraw(); // not a good idea, hangs
     const deck = this._deck;
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
@@ -137,7 +136,8 @@ export default class GoogleMapsOverlay {
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
       blendEquation: gl.FUNC_ADD,
       [GL.DRAW_FRAMEBUFFER_BINDING]: null,
-      [GL.READ_FRAMEBUFFER_BINDING]: null
+      [GL.READ_FRAMEBUFFER_BINDING]: null,
+      [GL.VIEWPORT]: [0, 0, 2 * width, 2 * height] // Hack
     };
 
     deck.setProps({
@@ -160,6 +160,19 @@ export default class GoogleMapsOverlay {
     // setParameters(gl, parameters);
 
     const oldParams = getParameters(gl);
+
+    if (oldParams[GL.DRAW_FRAMEBUFFER_BINDING]) {
+      // Hack to stop strange renders which don't
+      // work
+      // throw new Error();
+    }
+
+    // Not great, constantly redraws the map, but otherwise we
+    // lose the overlay?
+    // Google sample also does this
+    // https://github.com/googlemaps/js-samples/blob/464487f160bd8a07797885864243d24643c9c2bc/samples/webgl-deckgl/src/index.ts#L164
+    //this._overlay.requestRedraw();
+
     let preParams, postParams;
     withParameters(gl, parameters, () => {
       preParams = getParameters(gl);
@@ -167,17 +180,26 @@ export default class GoogleMapsOverlay {
       postParams = getParameters(gl);
     });
     let resetParams = getParameters(gl);
+    const format = v => {
+      if (Number.isInteger(v)) {
+        return PARAM_LOOKUP[v];
+      } else if (Array.isArray(v)) {
+        return `[${v.join(', ')}]`;
+      }
+
+      return v;
+    };
 
     for (let key of Object.keys(postParams)) {
       const old = oldParams[key];
       const pre = preParams[key];
       const post = postParams[key];
       const reset = resetParams[key];
-      if (old !== post) {
-        oldParams[PARAM_LOOKUP[key]] = Number.isInteger(old) ? PARAM_LOOKUP[old] : old;
-        preParams[PARAM_LOOKUP[key]] = Number.isInteger(pre) ? PARAM_LOOKUP[pre] : pre;
-        postParams[PARAM_LOOKUP[key]] = Number.isInteger(post) ? PARAM_LOOKUP[post] : post;
-        resetParams[PARAM_LOOKUP[key]] = Number.isInteger(reset) ? PARAM_LOOKUP[reset] : reset;
+      if (old !== pre || old !== post || old !== reset) {
+        oldParams[PARAM_LOOKUP[key]] = format(old);
+        preParams[PARAM_LOOKUP[key]] = format(pre);
+        postParams[PARAM_LOOKUP[key]] = format(post);
+        resetParams[PARAM_LOOKUP[key]] = format(reset);
       }
       delete oldParams[key];
       delete preParams[key];
