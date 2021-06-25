@@ -119,11 +119,6 @@ export default class GoogleMapsOverlay {
 
     //this._overlay.requestRedraw(); // not a good idea, hangs
     const deck = this._deck;
-    setParameters(gl, {
-      [gl.DRAW_FRAMEBUFFER_BINDING]: null,
-      [gl.READ_FRAMEBUFFER_BINDING]: null
-    });
-    const oldParams = getParameters(gl);
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
       this._map,
@@ -140,7 +135,9 @@ export default class GoogleMapsOverlay {
       depthMask: true,
       depthTest: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
-      blendEquation: gl.FUNC_ADD
+      blendEquation: gl.FUNC_ADD,
+      [gl.DRAW_FRAMEBUFFER_BINDING]: null,
+      [gl.READ_FRAMEBUFFER_BINDING]: null
     };
 
     deck.setProps({
@@ -159,29 +156,32 @@ export default class GoogleMapsOverlay {
       }
     });
 
-    let updatedParams;
+    const oldParams = getParameters(gl);
+    let preParams, postParams;
     withParameters(gl, parameters, () => {
+      preParams = getParameters(gl);
       deck.redraw('google-vector');
-      updatedParams = getParameters(gl);
+      postParams = getParameters(gl);
     });
     let resetParams = getParameters(gl);
 
-    for (let key of Object.keys(updatedParams)) {
+    for (let key of Object.keys(postParams)) {
       const old = oldParams[key];
-      const updated = updatedParams[key];
+      const pre = preParams[key];
+      const post = postParams[key];
       const reset = resetParams[key];
-      if (old !== updated) {
+      if (old !== post) {
         oldParams[PARAM_LOOKUP[key]] = Number.isInteger(old) ? PARAM_LOOKUP[old] : old;
-        updatedParams[PARAM_LOOKUP[key]] = Number.isInteger(updated)
-          ? PARAM_LOOKUP[updated]
-          : updated;
+        preParams[PARAM_LOOKUP[key]] = Number.isInteger(pre) ? PARAM_LOOKUP[pre] : pre;
+        postParams[PARAM_LOOKUP[key]] = Number.isInteger(post) ? PARAM_LOOKUP[post] : post;
         resetParams[PARAM_LOOKUP[key]] = Number.isInteger(reset) ? PARAM_LOOKUP[reset] : reset;
       }
       delete oldParams[key];
-      delete updatedParams[key];
+      delete preParams[key];
+      delete postParams[key];
       delete resetParams[key];
     }
 
-    console.table({old: oldParams, updated: updatedParams, reset: resetParams});
+    console.table({old: oldParams, pre: preParams, post: postParams, reset: resetParams});
   }
 }
