@@ -1,8 +1,14 @@
 /* global google */
-import {getParameters, setParameters, resetParameters} from '@luma.gl/core';
+import {getParameters, setParameters, resetParameters, withParameters} from '@luma.gl/core';
+import CONSTANTS from '@luma.gl/constants';
 import {createDeckInstance, destroyDeckInstance, getViewState} from './webgl-utils';
 
 const HIDE_ALL_LAYERS = () => false;
+
+const PARAM_LOOKUP = {};
+Object.entries(CONSTANTS).forEach(([k, v]) => {
+  PARAM_LOOKUP[v] = k;
+});
 
 function matEqual(a, b) {
   if (a === undefined || b === undefined) {
@@ -113,7 +119,7 @@ export default class GoogleMapsOverlay {
 
     //this._overlay.requestRedraw(); // not a good idea, hangs
     const deck = this._deck;
-    //const oldParams = getParameters(gl);
+    const oldParams = getParameters(gl);
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
       this._map,
@@ -140,13 +146,21 @@ export default class GoogleMapsOverlay {
         zoom,
         repeat: true
       }
-      // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
     });
     // Deck is initialized
     deck.redraw('google-vector');
 
     // Reset GL params (unclear if necessary)
-    //setParameters(gl, oldParams);
-    //resetParameters(gl);
+    const updatedParams = getParameters(gl);
+    for (let key of Object.keys(updatedParams)) {
+      if (oldParams[key] !== updatedParams[key]) {
+        oldParams[PARAM_LOOKUP[key]] = oldParams[key];
+        updatedParams[PARAM_LOOKUP[key]] = updatedParams[key];
+      }
+      delete oldParams[key];
+      delete updatedParams[key];
+    }
+
+    console.table({old: oldParams, updated: updatedParams});
   }
 }
