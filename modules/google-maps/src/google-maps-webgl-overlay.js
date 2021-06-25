@@ -119,6 +119,10 @@ export default class GoogleMapsOverlay {
 
     //this._overlay.requestRedraw(); // not a good idea, hangs
     const deck = this._deck;
+    setParameters(gl, {
+      [gl.DRAW_FRAMEBUFFER_BINDING]: null,
+      [gl.READ_FRAMEBUFFER_BINDING]: null
+    });
     const oldParams = getParameters(gl);
 
     const {width, height, zoom, bearing, pitch, latitude, longitude} = getViewState(
@@ -131,6 +135,13 @@ export default class GoogleMapsOverlay {
     const altitude = 1;
     const nearZMultiplier = 0.3333333432674408;
     const farZMultiplier = 10000000;
+
+    const parameters = {
+      depthMask: true,
+      depthTest: true,
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      blendEquation: gl.FUNC_ADD
+    };
 
     deck.setProps({
       width,
@@ -147,20 +158,30 @@ export default class GoogleMapsOverlay {
         repeat: true
       }
     });
-    // Deck is initialized
-    deck.redraw('google-vector');
 
-    // Reset GL params (unclear if necessary)
-    const updatedParams = getParameters(gl);
+    let updatedParams;
+    withParameters(gl, parameters, () => {
+      deck.redraw('google-vector');
+      updatedParams = getParameters(gl);
+    });
+    let resetParams = getParameters(gl);
+
     for (let key of Object.keys(updatedParams)) {
-      if (oldParams[key] !== updatedParams[key]) {
-        oldParams[PARAM_LOOKUP[key]] = oldParams[key];
-        updatedParams[PARAM_LOOKUP[key]] = updatedParams[key];
+      const old = oldParams[key];
+      const updated = updatedParams[key];
+      const reset = resetParams[key];
+      if (old !== updated) {
+        oldParams[PARAM_LOOKUP[key]] = Number.isInteger(old) ? PARAM_LOOKUP[old] : old;
+        updatedParams[PARAM_LOOKUP[key]] = Number.isInteger(updated)
+          ? PARAM_LOOKUP[updated]
+          : updated;
+        resetParams[PARAM_LOOKUP[key]] = Number.isInteger(reset) ? PARAM_LOOKUP[reset] : reset;
       }
       delete oldParams[key];
       delete updatedParams[key];
+      delete resetParams[key];
     }
 
-    console.table({old: oldParams, updated: updatedParams});
+    console.table({old: oldParams, updated: updatedParams, reset: resetParams});
   }
 }
