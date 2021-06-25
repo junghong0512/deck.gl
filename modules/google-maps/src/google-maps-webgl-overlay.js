@@ -176,7 +176,11 @@ export default class GoogleMapsOverlay {
     let preParams, postParams;
     withParameters(gl, parameters, () => {
       preParams = getParameters(gl);
-      deck.redraw('google-vector');
+      // Using redraw means the canvas is cleared, want to avoid this
+      //deck.redraw('google-vector');
+      deck._drawLayers('google-vector', {
+        clearCanvas: false
+      });
       postParams = getParameters(gl);
     });
     let resetParams = getParameters(gl);

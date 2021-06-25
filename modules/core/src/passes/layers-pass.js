@@ -17,7 +17,7 @@ export default class LayersPass extends Pass {
     props.pass = props.pass || 'unknown';
 
     const gl = this.gl;
-    if (clearCanvas && redrawReason !== 'google-vector') {
+    if (clearCanvas) {
       clearGLCanvas(gl);
     }
 
