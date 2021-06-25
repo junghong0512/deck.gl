@@ -1,12 +1,12 @@
 /* global google */
 import {getParameters, setParameters, resetParameters, withParameters} from '@luma.gl/core';
-import CONSTANTS from '@luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {createDeckInstance, destroyDeckInstance, getViewState} from './webgl-utils';
 
 const HIDE_ALL_LAYERS = () => false;
 
 const PARAM_LOOKUP = {};
-Object.entries(CONSTANTS).forEach(([k, v]) => {
+Object.entries(GL).forEach(([k, v]) => {
   PARAM_LOOKUP[v] = k;
 });
 
@@ -136,8 +136,8 @@ export default class GoogleMapsOverlay {
       depthTest: true,
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
       blendEquation: gl.FUNC_ADD,
-      [gl.DRAW_FRAMEBUFFER_BINDING]: null,
-      [gl.READ_FRAMEBUFFER_BINDING]: null
+      [GL.DRAW_FRAMEBUFFER_BINDING]: null,
+      [GL.READ_FRAMEBUFFER_BINDING]: null
     };
 
     deck.setProps({
@@ -155,6 +155,9 @@ export default class GoogleMapsOverlay {
         repeat: true
       }
     });
+
+    // Doesn't help...
+    // setParameters(gl, parameters);
 
     const oldParams = getParameters(gl);
     let preParams, postParams;
