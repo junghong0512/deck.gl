@@ -1,4 +1,4 @@
-/* global document, google */
+/* global document, google, window */
 // import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {GoogleMapsWebglOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
@@ -30,6 +30,7 @@ loadScript(GOOGLE_MAPS_API_URL).then(() => {
     zoom: 5,
     mapId: GOOGLE_MAP_ID
   });
+  window.map = map;
 
   const overlay = new DeckOverlay({
     layers: [
