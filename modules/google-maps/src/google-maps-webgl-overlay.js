@@ -103,9 +103,10 @@ export default class GoogleMapsOverlay {
 
   _onDraw(gl, coordinateTransformer) {
     // Extract projection matrix
-    const projectionMatrix = [...coordinateTransformer.fromLatLngAltitude(this._map.center, 0)];
+    const H = 0;
+    const projectionMatrix = [...coordinateTransformer.fromLatLngAltitude(this._map.center, H)];
     const viewMatrix = [
-      ...coordinateTransformer.fromLatLngAltitude({lat: -90, lng: -180}, 0, [0, 0, 0], [1, 1, 1])
+      ...coordinateTransformer.fromLatLngAltitude({lat: -90, lng: -180}, H, [0, 0, 0], [1, 1, 1])
     ];
 
     if (!matEqual(projectionMatrix, window._projectionMatrix)) {
@@ -211,6 +212,6 @@ export default class GoogleMapsOverlay {
       delete resetParams[key];
     }
 
-    console.table({old: oldParams, pre: preParams, post: postParams, reset: resetParams});
+    //console.table({old: oldParams, pre: preParams, post: postParams, reset: resetParams});
   }
 }
