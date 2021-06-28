@@ -66,6 +66,13 @@ export function createDeckInstance(map, gl, deck, props) {
     deck = new Deck(deckProps);
   }
 
+  // Register event listeners
+  for (const eventType in eventListeners) {
+    eventListeners[eventType] = map.addListener(eventType, evt =>
+      handleMouseEvent(deck, eventType, evt)
+    );
+  }
+
   return deck;
 }
 
@@ -123,4 +130,55 @@ export function getViewState(map, coordinateTransformer) {
     latitude,
     longitude
   };
+}
+/* eslint-enable max-statements */
+
+function getEventPixel(event, deck) {
+  if (event.pixel) {
+    return event.pixel;
+  }
+  // event.pixel may not exist when clicking on a POI
+  // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
+  const point = deck.getViewports()[0].project([event.latLng.lng(), event.latLng.lat()]);
+  return {
+    x: point[0],
+    y: point[1]
+  };
+}
+
+// Triggers picking on a mouse event
+function handleMouseEvent(deck, type, event) {
+  const mockEvent = {
+    type,
+    offsetCenter: getEventPixel(event, deck),
+    srcEvent: event
+  };
+
+  switch (type) {
+    case 'click':
+      // Hack: because we do not listen to pointer down, perform picking now
+      deck._lastPointerDownInfo = deck.pickObject(mockEvent.offsetCenter);
+      mockEvent.tapCount = 1;
+      deck._onEvent(mockEvent);
+      break;
+
+    case 'dblclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 2;
+      deck._onEvent(mockEvent);
+      break;
+
+    case 'mousemove':
+      mockEvent.type = 'pointermove';
+      deck._onPointerMove(mockEvent);
+      break;
+
+    case 'mouseout':
+      mockEvent.type = 'pointerleave';
+      deck._onPointerMove(mockEvent);
+      break;
+
+    default:
+      return;
+  }
 }
