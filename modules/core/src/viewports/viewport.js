@@ -471,15 +471,36 @@ export default class Viewport {
         return info;
       };
 
+      if (window._viewMatrix) {
+        // Attempt to convert Google Matrix to Deck
+        // matrix
+        const gInfo = vpmInfo(window._viewMatrix);
+        const dInfo = vpmInfo(this.viewProjectionMatrix);
+        const s = dInfo.scaleZ / gInfo.scaleZ;
+        const a = dInfo.altitude / gInfo.altitude;
+
+        // Construct viewProj from Google matrix
+        // s & a appear to be generally constant
+        // so the conversion between the two would
+        // seem to be a scaling factor
+        const vpm = createMat4();
+        mat4.multiply(vpm, vpm, window._viewMatrix);
+        mat4.scale(vpm, vpm, [s * a, s * a, s]);
+
+        // This gets very close, but doesn't work
+        // this.viewProjectionMatrix = vpm;
+      }
+
       // Display information about VP matrices
-      if (Math.random() < 0.1) {
-        const gInfo = vpmInfo(window._viewMatrix, true);
+      // Use Math.random to reduce log frequency
+      if (false && Math.random() < 0.1) {
+        const gInfo = vpmInfo(window._viewMatrix);
         const dInfo = vpmInfo(this.viewProjectionMatrix);
         console.table({
           Google: gInfo,
           Deck: dInfo
         });
-        console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
+        //console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
       }
     }
 
