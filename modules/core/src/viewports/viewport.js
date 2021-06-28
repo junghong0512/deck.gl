@@ -403,17 +403,16 @@ export default class Viewport {
   }
 
   _initPixelMatrices() {
-    if (false && window._projectionMatrix) {
-      this.projectionMatrix.copy(window._projectionMatrix);
-
-      // decompose (experiment)
-      const viewMatrix = createMat4();
+    if (window._viewMatrix) {
+      // decompose to extract Google projection matrix (experiment)
+      // doesn't work as scaling is different
+      const projMatrix = createMat4();
       const mvpMatrix = window._viewMatrix;
-      const projectionMatrixInverse = mat4.invert([], this.projectionMatrix);
-      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
-      mat4.multiply(viewMatrix, viewMatrix, mvpMatrix);
+      const viewMatrixInverse = mat4.invert([], this.viewMatrix);
+      mat4.multiply(projMatrix, projMatrix, mvpMatrix);
+      mat4.multiply(projMatrix, projMatrix, viewMatrixInverse);
 
-      this.viewMatrix.copy(viewMatrix);
+      this.projectionGoogle = projMatrix;
     }
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
@@ -488,19 +487,19 @@ export default class Viewport {
         mat4.scale(vpm, vpm, [s * a, s * a, s]);
 
         // This gets very close, but doesn't work
-        // this.viewProjectionMatrix = vpm;
+        this.viewProjectionMatrix2 = vpm;
       }
 
       // Display information about VP matrices
       // Use Math.random to reduce log frequency
-      if (false && Math.random() < 0.1) {
+      if (Math.random() < 0.1) {
         const gInfo = vpmInfo(window._viewMatrix);
         const dInfo = vpmInfo(this.viewProjectionMatrix);
         console.table({
           Google: gInfo,
           Deck: dInfo
         });
-        //console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
+        console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
       }
     }
 
