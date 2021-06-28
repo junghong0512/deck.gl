@@ -128,8 +128,8 @@ export default class GoogleMapsOverlay {
     // Google appears to use 1m as their altitude when constructing
     // the Mercator projection matrix (deck.gl default is 1.5m)
     const altitude = 1;
-    const nearZMultiplier = 0.3333333432674408;
-    const farZMultiplier = 10000000;
+    const nearZMultiplier = window._viewMatrix[14];
+    const farZMultiplier = 1000000000;
 
     const parameters = {
       depthMask: true,
