@@ -172,7 +172,7 @@ export default class GoogleMapsOverlay {
     // lose the overlay?
     // Google sample also does this
     // https://github.com/googlemaps/js-samples/blob/464487f160bd8a07797885864243d24643c9c2bc/samples/webgl-deckgl/src/index.ts#L164
-    //this._overlay.requestRedraw();
+    this._overlay.requestRedraw();
 
     let preParams, postParams;
     withParameters(gl, parameters, () => {
