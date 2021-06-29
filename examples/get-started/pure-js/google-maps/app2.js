@@ -33,9 +33,9 @@ function loadScript(url) {
 loadScript(GOOGLE_MAPS_API_URL).then(() => {
   const map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 40.72, lng: -74},
-    // tilt: 45, // paths don't quite line up
+    tilt: 45,
     bearing: 0,
-    zoom: 13,
+    zoom: 15,
     mapId: GOOGLE_MAP_ID
   });
   window.map = map;
