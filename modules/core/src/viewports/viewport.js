@@ -454,6 +454,23 @@ export default class Viewport {
       this.cleanMatrix = cleanMatrix;
       const fov = (2 * Math.atan(1 / this.cleanMatrix[5]) * 180) / Math.PI;
       // console.log('Google FOV', fov, 'altitude', cleanMatrix[5] / 2);
+
+      // Split out view matrix from projection
+      const viewMatrix = createMat4();
+      const projectionMatrixInverse = mat4.invert([], this.cleanMatrix);
+      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
+      mat4.multiply(viewMatrix, viewMatrix, window._viewMatrix);
+      const s = 15211.650516609221;
+      mat4.scale(viewMatrix, viewMatrix, [s, s, s]);
+
+      // Don't quite line up, find difference
+      const gViewMatrixInverse = mat4.invert([], viewMatrix);
+      const diffMatrix = createMat4();
+      mat4.multiply(diffMatrix, diffMatrix, this.viewMatrix);
+      mat4.multiply(diffMatrix, diffMatrix, gViewMatrixInverse);
+
+      const nn = 1000000000;
+      //console.log(diffMatrix.map(x => Math.round(nn * x) / nn));
     }
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
