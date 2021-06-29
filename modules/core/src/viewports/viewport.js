@@ -447,7 +447,7 @@ export default class Viewport {
 
       const vpmInfo = function(m, goo) {
         const scaleZ = -m[11];
-        const scaleY = goo ? 2.255354166030884 * scaleZ : scaleZ; // assume scaleZ = scaleY??
+        const scaleY = goo ? 2.255354243958135 * scaleZ : scaleZ; // assume scaleZ = scaleY??
         const aspect = m[5] / m[0];
         const f = m[5] / scaleY;
         const info = {
@@ -460,11 +460,11 @@ export default class Viewport {
         };
         if (m[10] === m[11]) {
           // Far plane is at infinity
-          info.near = (1 - m[14]) / 2;
+          info.near = (m[15] - m[14]) / 2;
           info.far = Infinity;
         } else {
           const a = -m[10] / m[11];
-          const b = m[14] - m[10] / m[11];
+          const b = m[14] - (m[10] * m[15]) / m[11];
           info.far = b / (1 + a);
           info.near = (info.far * (1 + a)) / (a - 1);
         }
@@ -495,7 +495,7 @@ export default class Viewport {
       // Display information about VP matrices
       // Use Math.random to reduce log frequency
       if (Math.random() < 0.1) {
-        const gInfo = vpmInfo(window._viewMatrix);
+        const gInfo = vpmInfo(window._viewMatrix, true);
         const dInfo = vpmInfo(this.viewProjectionMatrix);
         // console.table({
         //   Google: gInfo,
