@@ -13,7 +13,7 @@ export default class LayersPass extends Pass {
   // PRIVATE
   // Draw a list of layers in a list of viewports
   _drawLayers(props) {
-    const {redrawReason, viewports, views, onViewportActive, clearCanvas = true} = props;
+    const {viewports, views, onViewportActive, clearCanvas = true} = props;
     props.pass = props.pass || 'unknown';
 
     const gl = this.gl;

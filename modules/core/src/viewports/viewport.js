@@ -402,6 +402,8 @@ export default class Viewport {
       });
   }
 
+  // NOTE: All changes below are just for debugging, and do not
+  // affect output
   _initPixelMatrices() {
     if (window._viewMatrix) {
       // decompose to extract Google projection matrix (experiment)
@@ -440,8 +442,8 @@ export default class Viewport {
       const gViewMatrixInverse = mat4.invert([], viewMatrix);
       const gCamera = getCameraPosition(gViewMatrixInverse);
       const c = this.cameraPosition;
-      //console.log('google camera', gCamera, 'deck', this.cameraPosition);
-      //console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
+      // console.log('google camera', gCamera, 'deck', this.cameraPosition);
+      // console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
 
       const vpmInfo = function(m, goo) {
         const scaleZ = -m[11];
@@ -495,11 +497,11 @@ export default class Viewport {
       if (Math.random() < 0.1) {
         const gInfo = vpmInfo(window._viewMatrix);
         const dInfo = vpmInfo(this.viewProjectionMatrix);
-        console.table({
-          Google: gInfo,
-          Deck: dInfo
-        });
-        console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
+        // console.table({
+        //   Google: gInfo,
+        //   Deck: dInfo
+        // });
+        // console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
       }
     }
 
