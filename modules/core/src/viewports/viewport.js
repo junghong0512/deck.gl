@@ -405,6 +405,33 @@ export default class Viewport {
   // NOTE: All changes below are just for debugging, and do not
   // affect output
   _initPixelMatrices() {
+    const vpmInfo = function(m, goo) {
+      const scaleZ = -m[11];
+      const scaleY = goo ? 2.255354243958135 * scaleZ : scaleZ; // assume scaleZ = scaleY??
+      const aspect = m[5] / m[0];
+      const f = m[5] / scaleY;
+      const info = {
+        altitude: f / 2,
+        aspect,
+        scaleZ, // assume equal to scaleX and scaleY
+        translateX: (aspect * m[12]) / f,
+        translateY: m[13] / f,
+        translateZ: -m[15]
+      };
+      if (m[10] === m[11]) {
+        // Far plane is at infinity
+        info.near = (m[15] - m[14]) / 2;
+        info.far = Infinity;
+      } else {
+        const a = -m[10] / m[11];
+        const b = m[14] - (m[10] * m[15]) / m[11];
+        info.far = b / (1 + a);
+        info.near = (info.far * (1 + a)) / (a - 1);
+      }
+
+      return info;
+    };
+
     if (window._viewMatrix) {
       // decompose to extract Google projection matrix (experiment)
       // doesn't work as scaling is different
@@ -415,6 +442,16 @@ export default class Viewport {
       mat4.multiply(projMatrix, projMatrix, viewMatrixInverse);
 
       this.projectionGoogle = projMatrix;
+
+      // Strip scale & translation from projection matrix
+      const cleanMatrix = createMat4();
+      const gInfo = vpmInfo(window._projectionMatrix);
+      cleanMatrix[0] = (2 * gInfo.altitude) / gInfo.aspect;
+      cleanMatrix[5] = 2 * gInfo.altitude;
+      cleanMatrix[10] = -1;
+      cleanMatrix[11] = -1;
+      cleanMatrix[14] = -2 * gInfo.near;
+      this.cleanMatrix = cleanMatrix;
     }
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
@@ -444,33 +481,6 @@ export default class Viewport {
       const c = this.cameraPosition;
       // console.log('google camera', gCamera, 'deck', this.cameraPosition);
       // console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
-
-      const vpmInfo = function(m, goo) {
-        const scaleZ = -m[11];
-        const scaleY = goo ? 2.255354243958135 * scaleZ : scaleZ; // assume scaleZ = scaleY??
-        const aspect = m[5] / m[0];
-        const f = m[5] / scaleY;
-        const info = {
-          altitude: f / 2,
-          aspect,
-          scaleZ, // assume equal to scaleX and scaleY
-          translateX: (aspect * m[12]) / f,
-          translateY: m[13] / f,
-          translateZ: -m[15]
-        };
-        if (m[10] === m[11]) {
-          // Far plane is at infinity
-          info.near = (m[15] - m[14]) / 2;
-          info.far = Infinity;
-        } else {
-          const a = -m[10] / m[11];
-          const b = m[14] - (m[10] * m[15]) / m[11];
-          info.far = b / (1 + a);
-          info.near = (info.far * (1 + a)) / (a - 1);
-        }
-
-        return info;
-      };
 
       if (window._viewMatrix) {
         // Attempt to convert Google Matrix to Deck
