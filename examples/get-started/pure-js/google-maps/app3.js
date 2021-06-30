@@ -9,7 +9,7 @@ import * as dataSamples from '../../../layer-browser/src/data-samples';
 
 registerLoaders([GLTFLoader]);
 
-const GOOGLE_MAP_ID = 'f865292e93a85c6c';
+const GOOGLE_MAP_ID = 'fae05836df2dc8bb';
 
 // Set your Google Maps API key here or via environment variable
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line

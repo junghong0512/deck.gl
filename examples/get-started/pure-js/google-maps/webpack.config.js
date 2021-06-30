@@ -7,7 +7,7 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: './app.js'
+    app: './app3.js'
   },
 
   plugins: [
