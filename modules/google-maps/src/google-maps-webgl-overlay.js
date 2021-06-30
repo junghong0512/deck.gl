@@ -137,8 +137,7 @@ export default class GoogleMapsOverlay {
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
       blendEquation: gl.FUNC_ADD,
       [GL.DRAW_FRAMEBUFFER_BINDING]: null,
-      [GL.READ_FRAMEBUFFER_BINDING]: null,
-      [GL.VIEWPORT]: [0, 0, 2 * width, 2 * height] // Hack
+      [GL.READ_FRAMEBUFFER_BINDING]: null
     };
 
     deck.setProps({

@@ -1,13 +1,13 @@
 /* global document, google, window */
 // import {GoogleMapsOverlay as DeckOverlay} from '@deck.gl/google-maps';
 import {GoogleMapsWebglOverlay as DeckOverlay} from '@deck.gl/google-maps';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {PLYLoader} from '@loaders.gl/ply';
+import {GLTFLoader} from '@loaders.gl/gltf';
 
 import * as dataSamples from '../../../layer-browser/src/data-samples';
 
-registerLoaders([PLYLoader]);
+registerLoaders([GLTFLoader]);
 
 const LOOP_LENGTH = 1800;
 
@@ -28,58 +28,49 @@ function loadScript(url) {
   });
 }
 
-function getTransformMatrix(d) {
-  return [
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    0,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    0,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    0,
-    0,
-    0,
-    Math.random() * 10,
-    1
-  ];
-}
+const center = {lat: 37.79200903435449, lng: -122.40333859851314};
 
 loadScript(GOOGLE_MAPS_API_URL).then(() => {
   const map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 37.752, lng: -122.427},
+    center,
     tilt: 45,
     bearing: 0,
-    zoom: 12,
+    zoom: 17,
     mapId: GOOGLE_MAP_ID
   });
   window.map = map;
 
   let currentTime = 0;
   const props = {
-    id: 'mesh-layer',
-    data: dataSamples.points,
-    mesh:
-      'https://raw.githubusercontent.com/uber-web/loaders.gl/e8e7f724cc1fc1d5882125b13e672e44e5ada14e/modules/ply/test/data/cube_att.ply',
-    sizeScale: 4,
+    id: 'scenegraph-layer',
+    data: dataSamples.points.filter(p => {
+      return (
+        Math.abs(p.COORDINATES[0] - center.lng) < 0.01 &&
+        Math.abs(p.COORDINATES[1] - center.lat) < 0.01
+      );
+    }),
+    pickable: true,
+    sizeScale: 1,
+    scenegraph:
+      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
     getPosition: d => d.COORDINATES,
-    getColor: d => [Math.random() * 255, Math.random() * 255, Math.random() * 255],
-    getTransformMatrix
+    getOrientation: d => [0, Math.random() * 360, 90],
+    getScale: d => {
+      const s = 5 + 30 * Math.random();
+      return [s, s, s];
+    },
+    _lighting: 'flat'
   };
 
   const overlay = new DeckOverlay({});
   const animate = () => {
     currentTime = (currentTime + 1) % LOOP_LENGTH;
-    const simpleMeshLayer = new SimpleMeshLayer({
+    const layer = new ScenegraphLayer({
       ...props,
       currentTime
     });
     overlay.setProps({
-      layers: [simpleMeshLayer]
+      layers: [layer]
     });
 
     //window.requestAnimationFrame(animate);
