@@ -125,9 +125,16 @@ export default class GoogleMapsOverlay {
       coordinateTransformer
     );
 
-    // Google appears to use 1m as their altitude when constructing
-    // the Mercator projection matrix (deck.gl default is 1.5m)
-    const altitude = 2.2553542518310286; // [0.5 / Math.tan(0.5 * (25 * Math.PI / 180))]
+    // Match Google projection matrix
+    // The view matrix altitude is 1m, however the FOV is
+    // not calculated from this, but rather is set to 25 degrees.
+    // To create the same matrix, provide the altitude such that we obtain a FOV of 25, and then scale the view matrix
+    const altitude = 2.2553542518310286; // FOV of 25: [0.5 / Math.tan(0.5 * (25 * Math.PI / 180))]
+
+    // Scales view matrix to make z-translation equal to 1
+    const scaleMultiplier = 1 / altitude;
+
+    // Match depth range (crucial for correct z-sorting)
     const nearZMultiplier = 0.3333333432674408;
     const farZMultiplier = 300000000000000; // Max before percision errors
 
@@ -151,8 +158,9 @@ export default class GoogleMapsOverlay {
         longitude,
         nearZMultiplier,
         pitch,
-        zoom,
-        repeat: true
+        repeat: true,
+        scaleMultiplier,
+        zoom
       }
     });
 

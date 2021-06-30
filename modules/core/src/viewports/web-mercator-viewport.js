@@ -52,6 +52,7 @@ export default class WebMercatorViewport extends Viewport {
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
+      scaleMultiplier = 1,
       orthographic = false,
 
       repeat = false,
@@ -86,8 +87,8 @@ export default class WebMercatorViewport extends Viewport {
       height,
       pitch,
       bearing,
-      scale: scale / 2.255354252780911,
-      altitude: altitude / 2.255354252780911
+      scale: scale * scaleMultiplier,
+      altitude: altitude * scaleMultiplier
     });
 
     if (worldOffset) {
