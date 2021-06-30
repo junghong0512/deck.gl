@@ -9,8 +9,6 @@ import * as dataSamples from '../../../layer-browser/src/data-samples';
 
 registerLoaders([GLTFLoader]);
 
-const LOOP_LENGTH = 1800;
-
 const GOOGLE_MAP_ID = 'f865292e93a85c6c';
 
 // Set your Google Maps API key here or via environment variable
@@ -40,7 +38,6 @@ loadScript(GOOGLE_MAPS_API_URL).then(() => {
   });
   window.map = map;
 
-  let currentTime = 0;
   const props = {
     id: 'scenegraph-layer',
     data: dataSamples.points.filter(p => {
@@ -59,23 +56,11 @@ loadScript(GOOGLE_MAPS_API_URL).then(() => {
       const s = 5 + 30 * Math.random();
       return [s, s, s];
     },
-    _lighting: 'flat'
+    _lighting: 'pbr'
   };
 
-  const overlay = new DeckOverlay({});
-  const animate = () => {
-    currentTime = (currentTime + 1) % LOOP_LENGTH;
-    const layer = new ScenegraphLayer({
-      ...props,
-      currentTime
-    });
-    overlay.setProps({
-      layers: [layer]
-    });
-
-    //window.requestAnimationFrame(animate);
-  };
-  window.requestAnimationFrame(animate);
-
+  const overlay = new DeckOverlay({
+    layers: [new ScenegraphLayer(props)]
+  });
   overlay.setMap(map);
 });
