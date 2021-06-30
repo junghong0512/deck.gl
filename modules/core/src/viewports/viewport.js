@@ -524,7 +524,7 @@ export default class Viewport {
       // Display information about VP matrices
       // Use Math.random to reduce log frequency
       if (Math.random() < 0.1) {
-        const gInfo = vpmInfo(window._viewMatrix, true);
+        const gInfo = vpmInfo(window._viewMatrix);
         const dInfo = vpmInfo(this.viewProjectionMatrix);
         // console.table({
         //   Google: gInfo,
