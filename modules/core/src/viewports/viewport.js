@@ -402,76 +402,7 @@ export default class Viewport {
       });
   }
 
-  // NOTE: All changes below are just for debugging, and do not
-  // affect output
   _initPixelMatrices() {
-    const vpmInfo = function(m, goo) {
-      const scaleZ = -m[11];
-      const scaleY = goo ? 2.255354243958135 * scaleZ : scaleZ; // assume scaleZ = scaleY??
-      const aspect = m[5] / m[0];
-      const f = m[5] / scaleY;
-      const info = {
-        altitude: f / 2,
-        aspect,
-        scaleZ, // assume equal to scaleX and scaleY
-        translateX: (aspect * m[12]) / f,
-        translateY: m[13] / f,
-        translateZ: -m[15]
-      };
-      if (m[10] === m[11]) {
-        // Far plane is at infinity
-        info.near = (m[15] - m[14]) / 2;
-        info.far = Infinity;
-      } else {
-        const a = -m[10] / m[11];
-        const b = m[14] - (m[10] * m[15]) / m[11];
-        info.far = b / (1 + a);
-        info.near = (info.far * (1 + a)) / (a - 1);
-      }
-
-      return info;
-    };
-
-    if (window._viewMatrix) {
-      // decompose to extract Google projection matrix (experiment)
-      // doesn't work as scaling is different
-      const projMatrix = createMat4();
-      const mvpMatrix = window._viewMatrix;
-      const viewMatrixInverse = mat4.invert([], this.viewMatrix);
-      mat4.multiply(projMatrix, projMatrix, mvpMatrix);
-      mat4.multiply(projMatrix, projMatrix, viewMatrixInverse);
-
-      this.projectionGoogle = projMatrix;
-
-      // Strip scale & translation from projection matrix
-      const cleanMatrix = createMat4();
-      const gInfo = vpmInfo(window._projectionMatrix);
-      cleanMatrix[0] = (2 * gInfo.altitude) / gInfo.aspect;
-      cleanMatrix[5] = 2 * gInfo.altitude;
-      cleanMatrix[10] = -1;
-      cleanMatrix[11] = -1;
-      cleanMatrix[14] = -2 * gInfo.near;
-      this.cleanMatrix = cleanMatrix;
-      const fov = (2 * Math.atan(1 / this.cleanMatrix[5]) * 180) / Math.PI;
-      // console.log('Google FOV', fov, 'altitude', cleanMatrix[5] / 2);
-
-      // Split out view matrix from projection
-      const viewMatrix = createMat4();
-      const projectionMatrixInverse = mat4.invert([], this.cleanMatrix);
-      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
-      mat4.multiply(viewMatrix, viewMatrix, window._viewMatrix);
-      const s = 15211.650516609221;
-      mat4.scale(viewMatrix, viewMatrix, [s, s, s]);
-
-      // Don't quite line up, find difference
-      const gViewMatrixInverse = mat4.invert([], viewMatrix);
-      const diffMatrix = createMat4();
-      mat4.multiply(diffMatrix, diffMatrix, this.viewMatrix);
-      mat4.multiply(diffMatrix, diffMatrix, gViewMatrixInverse);
-
-      const nn = 1000000000;
-      //console.log(diffMatrix.map(x => Math.round(nn * x) / nn));
-    }
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
     const vpm = createMat4();
@@ -484,55 +415,6 @@ export default class Viewport {
 
     // Decompose camera parameters
     this.cameraPosition = getCameraPosition(this.viewMatrixInverse);
-
-    if (window._projectionMatrix) {
-      // Split out view matrix from projection
-      const viewMatrix = createMat4();
-      const mvpMatrix = window._viewMatrix;
-      const projectionMatrixInverse = mat4.invert([], this.cleanMatrix);
-      mat4.multiply(viewMatrix, viewMatrix, projectionMatrixInverse);
-      mat4.multiply(viewMatrix, viewMatrix, mvpMatrix);
-      const gViewMatrixInverse2 = mat4.invert([], viewMatrix);
-
-      // Debug (get Google camera position)
-      const gViewMatrixInverse = mat4.invert([], viewMatrix);
-      const gCamera = getCameraPosition(gViewMatrixInverse);
-      const c = this.cameraPosition;
-      // console.log('google camera', gCamera, 'deck', this.cameraPosition);
-      // console.log(gCamera[0] / c[0], gCamera[1] / c[1], gCamera[2] / c[2]);
-
-      if (window._viewMatrix) {
-        // Attempt to convert Google Matrix to Deck
-        // matrix
-        const gInfo = vpmInfo(window._viewMatrix);
-        const dInfo = vpmInfo(this.viewProjectionMatrix);
-        const s = dInfo.scaleZ / gInfo.scaleZ;
-        const a = dInfo.altitude / gInfo.altitude;
-
-        // Construct viewProj from Google matrix
-        // s & a appear to be generally constant
-        // so the conversion between the two would
-        // seem to be a scaling factor
-        const vpm = createMat4();
-        mat4.multiply(vpm, vpm, window._viewMatrix);
-        mat4.scale(vpm, vpm, [s * a, s * a, s]);
-
-        // This gets very close, but doesn't work
-        this.viewProjectionMatrix2 = vpm;
-      }
-
-      // Display information about VP matrices
-      // Use Math.random to reduce log frequency
-      if (Math.random() < 0.1) {
-        const gInfo = vpmInfo(window._viewMatrix);
-        const dInfo = vpmInfo(this.viewProjectionMatrix);
-        // console.table({
-        //   Google: gInfo,
-        //   Deck: dInfo
-        // });
-        // console.log('scaleZ ratio D/G', dInfo.scaleZ / gInfo.scaleZ);
-      }
-    }
 
     /*
      * Builds matrices that converts preprojected lngLats to screen pixels
