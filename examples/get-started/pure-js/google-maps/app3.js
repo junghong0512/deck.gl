@@ -42,8 +42,8 @@ loadScript(GOOGLE_MAPS_API_URL).then(() => {
     id: 'scenegraph-layer',
     data: dataSamples.points.filter(p => {
       return (
-        Math.abs(p.COORDINATES[0] - center.lng) < 0.01 &&
-        Math.abs(p.COORDINATES[1] - center.lat) < 0.01
+        Math.abs(p.COORDINATES[0] - center.lng) < 0.002 &&
+        Math.abs(p.COORDINATES[1] - center.lat) < 0.002
       );
     }),
     pickable: true,
