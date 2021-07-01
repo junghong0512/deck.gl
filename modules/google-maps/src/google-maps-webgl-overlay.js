@@ -91,13 +91,11 @@ export default class GoogleMapsOverlay {
     // Match Google projection matrix
     // The view matrix altitude is 1m, however the FOV is
     // not calculated from this, but rather is set to 25 degrees.
-    // To create the same matrix, provide the altitude such that we obtain a FOV of 25, and then scale the view matrix
-    //const altitude = 2.2553542518310286; // FOV of 25: [0.5 / Math.tan(0.5 * (25 * Math.PI / 180))]
-    const altitude = 1; // FOV of 25: [0.5 / Math.tan(0.5 * (25 * Math.PI / 180))]
+    const altitude = 1;
     const fov = 25;
 
-    // Scales view matrix to make z-translation equal to 1
-    const scaleMultiplier = 1 / 2.2553542518310286;
+    // Adjust zoom to obtain correct scaling matrix
+    const scaleMultiplier = 2 * Math.tan(0.5 * ((fov * Math.PI) / 180));
 
     // Match depth range (crucial for correct z-sorting)
     const nearZMultiplier = 0.3333333432674408;
