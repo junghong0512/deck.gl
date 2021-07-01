@@ -123,7 +123,7 @@ export default class GoogleMapsOverlay {
         pitch,
         repeat: true,
         scaleMultiplier,
-        zoom
+        zoom: zoom + Math.log2(scaleMultiplier)
       }
     });
 

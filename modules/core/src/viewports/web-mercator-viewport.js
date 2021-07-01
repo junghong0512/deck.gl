@@ -87,7 +87,7 @@ export default class WebMercatorViewport extends Viewport {
       height,
       pitch,
       bearing,
-      scale: scale * scaleMultiplier,
+      scale,
       altitude: altitude * scaleMultiplier
     });
 
