@@ -160,6 +160,31 @@ We can now rewrite the VPM in terms of these parameters, by multiplying PM and V
 
 Next, we can use the fact that VPM[15] is always 1 to deduce that `t_z = -1` and using this obtain `near = (1 - VPM[14]) / 2`, which gives us the value for the near plane we had above (0.3333333432674408)
 
-### aspect
+### Aspect & scaling
 
 If we take the ratio of VPM[5] and VPM[0] while moving the map we notice that it is constant, and is equal to the aspect ratio of the map (width divided by height). This tells us that `s_x` and `s_y` are equal, which isn't surprising.
+
+### Field of view
+
+Making the assumption that the scale factor is equal in all dimensions, so that `s_y` and `s_z` are equal we can obtain `f = -VPM[5] / VPM[11]`, which gives us a value of 4.510708332061768. Moving the map around we see that this remains constant, confirming our intuition.
+
+Inverting the definition for `f` to obtain the field of view in degrees:
+
+    fov = (180 / Math.PI ) * 2 * Math.atan(1 / 4.510708332061768)
+
+gives us a field of view of 25 degrees.
+
+## Coverting to deck.gl parameters
+
+Having derived all the necessary values to construct the projection matrix that Google Maps is using, we just need to convert these parameters into something that deck.gl can use when constructing a viewport.
+
+Near and far planes are simple, as these correspond to `nearZMultiplier` and `farZMultiplier`.
+
+The field of view isn't a parameter accepted by deck.gl, instead we must supply an `altitude`. It can be shown that this altitude is simply half the value of `f` that we obtained when calculating the field of view, thus we can rearrange the equation for the field of view and calculate an altitude of 2.2553542518310286 whichcorresponds to a 25 degree field of view.
+
+Finally, we need to make sure that `t_z` is equal to -1. This is where the `scaleMultiplier` parameter comes in. When calculating `t_z` deck.gl also uses the `altitude` parameter. By default `t_z` is simply set to `altitude` (which happens to match what Mapbox does), but we need it equal 1. Thus we set the `scaleMultiplier` to `1 / altitude` to compensate.
+
+
+## TODO
+
+In future add some code snippets that we used to help to figure all this out.
