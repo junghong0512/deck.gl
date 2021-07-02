@@ -52,7 +52,7 @@ export default class WebMercatorViewport extends Viewport {
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
-      fov: fovDegrees,
+      projectionMatrix,
       orthographic = false,
 
       repeat = false,
@@ -69,13 +69,13 @@ export default class WebMercatorViewport extends Viewport {
     // Altitude - prevent division by 0
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
-    const altitudeOverride = fovDegrees && 0.5 / Math.tan(0.5 * ((fovDegrees * Math.PI) / 180));
+    const altitudeFromProjection = projectionMatrix && projectionMatrix[5] / 2;
 
     const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
       width,
       height,
       pitch,
-      altitude: fovDegrees ? altitudeOverride : altitude,
+      altitude,
       nearZMultiplier,
       farZMultiplier
     });
@@ -124,7 +124,7 @@ export default class WebMercatorViewport extends Viewport {
     this.zoom = zoom;
     this.pitch = pitch;
     this.bearing = bearing;
-    this.altitude = fovDegrees ? altitudeOverride : altitude;
+    this.altitude = projectionMatrix ? altitudeFromProjection : altitude;
 
     this.orthographic = orthographic;
 
