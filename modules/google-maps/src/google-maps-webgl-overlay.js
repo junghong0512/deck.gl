@@ -2,6 +2,8 @@
 import {withParameters} from '@luma.gl/core';
 import GL from '@luma.gl/constants';
 import {createDeckInstance, destroyDeckInstance, getViewState} from './webgl-utils';
+import {MapView} from '@deck.gl/core';
+import {Matrix4} from 'math.gl';
 
 const HIDE_ALL_LAYERS = () => false;
 
@@ -92,10 +94,10 @@ export default class GoogleMapsOverlay {
     // The view matrix altitude is 1m, however the FOV is
     // not calculated from this, but rather is set to 25 degrees.
     const altitude = 1;
-    const fov = 25;
+    const fovy = 25;
 
     // Adjust zoom to obtain correct scaling matrix
-    const scaleMultiplier = 2 * Math.tan(0.5 * ((fov * Math.PI) / 180));
+    const scaleMultiplier = 2 * Math.tan(0.5 * ((fovy * Math.PI) / 180));
 
     // Match depth range (crucial for correct z-sorting)
     const nearZMultiplier = 0.3333333432674408;
@@ -110,14 +112,27 @@ export default class GoogleMapsOverlay {
       [GL.READ_FRAMEBUFFER_BINDING]: null
     };
 
+    const aspect = width / height;
+    const projectionMatrix = new Matrix4().perspective({
+      fovy: (fovy * Math.PI) / 180,
+      aspect,
+      near: nearZMultiplier,
+      far: farZMultiplier
+    });
+
     deck.setProps({
       width,
       height,
+      views: [
+        new MapView({
+          id: 'google-maps-overlay-view',
+          projectionMatrix
+        })
+      ],
       viewState: {
         altitude,
         bearing,
         farZMultiplier,
-        fov,
         latitude,
         longitude,
         nearZMultiplier,
