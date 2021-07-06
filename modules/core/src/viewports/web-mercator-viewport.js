@@ -35,6 +35,8 @@ import {
 import * as vec2 from 'gl-matrix/vec2';
 import {Matrix4} from 'math.gl';
 
+const RADIANS_TO_DEGREES = 180 / Math.PI;
+
 export default class WebMercatorViewport extends Viewport {
   /**
    * @classdesc
@@ -75,7 +77,7 @@ export default class WebMercatorViewport extends Viewport {
       width,
       height,
       pitch,
-      altitude,
+      altitude: projectionMatrix ? altitudeFromProjection : altitude,
       nearZMultiplier,
       farZMultiplier
     });
@@ -124,7 +126,8 @@ export default class WebMercatorViewport extends Viewport {
     this.zoom = zoom;
     this.pitch = pitch;
     this.bearing = bearing;
-    this.altitude = projectionMatrix ? altitudeFromProjection : altitude;
+    this.altitude = altitude;
+    this.fovy = fov * RADIANS_TO_DEGREES;
 
     this.orthographic = orthographic;
 
