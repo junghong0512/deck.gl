@@ -71,13 +71,12 @@ export default class WebMercatorViewport extends Viewport {
     // Altitude - prevent division by 0
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
-    const altitudeFromProjection = projectionMatrix && projectionMatrix[5] / 2;
 
     const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
       width,
       height,
       pitch,
-      altitude: projectionMatrix ? altitudeFromProjection : altitude,
+      altitude: projectionMatrix ? projectionMatrix[5] / 2 : altitude,
       nearZMultiplier,
       farZMultiplier
     });
