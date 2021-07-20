@@ -11,6 +11,7 @@ import { DATA_URL } from './data';
 import { SEOUL_GU_LATLNG } from './seoulGu';
 import { SEOUL } from "./seoul";
 import { SELECTED_BUILDINGS } from "./seoul_buildings";
+import { DONG_DATA } from "./dong";
 
 const INITIAL_VIEW_STATE = {
   latitude: 37.498042,
@@ -148,6 +149,23 @@ export default function App({data = DATA_URL}) {
     new GeoJsonLayer({
       id: 'geojson2',
       data: SEOUL,
+      opacity: 0.4,
+      autoHighlight: true,
+      stroked: false,
+      filled: false,
+      extruded: true,
+      wireframe: true,
+      getElevation: 0,
+      lineWidthScale: 40,
+      lineWidthMinPixels: 5,
+      getFillColor: [160, 160, 180, 190],
+      getLineColor: [50, 10, 10],
+      pickable: true,
+    }),
+
+    new GeoJsonLayer({
+      id: 'geojson2',
+      data: DONG_DATA,
       opacity: 0.4,
       autoHighlight: true,
       stroked: false,
